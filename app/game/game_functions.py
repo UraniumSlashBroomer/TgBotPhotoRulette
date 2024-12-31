@@ -34,14 +34,20 @@ async def print_scores(message: Message, state: FSMContext, game):
 
 
 # Функция для отправки сообщений всем, кто в игре
-async def echo_all(message: Message, state: FSMContext, msg: str, with_user_who_triggered: bool):
+async def echo_all(message: Message, state: FSMContext, msg: str, with_user_who_triggered: bool, delete_kb: bool = False):
     data = await state.get_data()
     game = await get_game(data['token'])
     for player in game.players:
         if player.tg_id == message.from_user.id and with_user_who_triggered:
-            await message.bot.send_message(player.tg_id, msg)
+            if delete_kb:
+                await message.bot.send_message(player.tg_id, msg, reply_markup=kb.del_kb)
+            else:
+                await message.bot.send_message(player.tg_id, msg)
         else:
-            await message.bot.send_message(player.tg_id, msg)
+            if delete_kb:
+                await message.bot.send_message(player.tg_id, msg, reply_markup=kb.del_kb)
+            else:
+                await message.bot.send_message(player.tg_id, msg)
 
 # Проверка, все ли готовы начинать раунд
 async def round_ready(message: Message, state: FSMContext):

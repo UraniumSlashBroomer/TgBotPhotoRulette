@@ -1,5 +1,6 @@
 from aiogram import F, Router
 from aiogram.filters import Command
+from aiogram.enums import ParseMode
 
 from app.database.requests import get_nickname
 from app.architecture.states import *
@@ -34,8 +35,9 @@ async def cmd_create_game(message: Message, state: FSMContext):
     print(f'Игра создана успешно! \nИгра: {token} \nИгроки: {game.players}')
     print(f'Зашел игрок {user_id}\nhost: {game.host}')
     await message.answer('Игра создана. Скопируйте токен из следующего сообщения и отправьте друзьям:', reply_markup=kb.del_kb)
-    await message.answer(f'{token}')
-    await message.answer('Отправьте фото для игры.\nКогда добавите все фото, используйте команду /ready')
+    await message.answer(text=f'```\n{token}\n```', parse_mode=ParseMode.MARKDOWN)
+    await message.answer('Отправьте (сколько угодно) фото для игры.\nКогда добавите все фото, используйте команду /ready' + \
+                             ' или нажмите на соответствующую клавишу на клавиатуре', reply_markup=kb.ready_kb)
 
     await state.set_state(GameState.adding_photos)
 
@@ -58,7 +60,8 @@ async def cmd_join_to_game_2(message: Message, state: FSMContext):
         await state.update_data(current_user=current_user)
 
         await message.answer('Подключение произошло успешно!')
-        await message.answer('Отправьте фото для игры.\nКогда добавите все фото, используйте команду /ready')
+        await message.answer('Отправьте (сколько угодно) фото для игры.\nКогда добавите все фото, используйте команду /ready' + \
+                             ' или нажмите на соответствующую клавишу на клавиатуре', reply_markup=kb.ready_kb)
         await state.set_state(GameState.adding_photos)
         await state.update_data(token=token)
         await echo_all(message, state, f'Зашел игрок {nickname}! Всего игроков в игре: {len(game.players)}', True)
@@ -74,13 +77,14 @@ async def add_photos(message: Message, state: FSMContext):
     await game.add_photo(message.photo[-1].file_id, player.name)
 
 # Игрок вызвал команду /ready
+@game_router.message(F.text == 'Я готов!', GameState.adding_photos)
 @game_router.message(Command('ready'), GameState.adding_photos)
 async def ready_with_photos(message: Message, state: FSMContext):
     data = await state.get_data()
     game = await get_game(data['token'])
     current_user = data['current_user']
     await game.player_ready(current_user)
-    await message.answer('Вы готовы.')
+    await message.answer('Вы готовы.', reply_markup=kb.del_kb)
 
     counter = 0
     for user in game.players:
@@ -89,7 +93,7 @@ async def ready_with_photos(message: Message, state: FSMContext):
 
     if counter == len(game.players):
         await echo_all(message, state, f'Все готовы! Хост может запустить игру', True)
-        await message.bot.send_message(game.host, f'Вы хост. Используйте команду /all_ready, чтобы запустить игру')
+        await message.bot.send_message(game.host, f'Вы хост. Используйте команду /all_ready, чтобы запустить игру', reply_markup=kb.ready_all_kb)
         if current_user.tg_id == game.host:
             await state.set_state(GameState.all_ready)
         else:
@@ -100,6 +104,7 @@ async def ready_with_photos(message: Message, state: FSMContext):
     print(f'ID фотографий в игре: {game.photos}')
 
 # Это функция старта игры для хоста
+@game_router.message(F.text == 'Начать игру!', GameState.all_ready)
 @game_router.message(Command('all_ready'), GameState.all_ready)
 async def cmd_host_ready(message: Message, state: FSMContext):
     data = await state.get_data()
