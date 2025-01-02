@@ -59,7 +59,7 @@ async def cmd_join_to_game_2(message: Message, state: FSMContext):
         msg = await game.add_player(current_user)
         if not msg:
             await state.update_data(current_user=current_user)
-    
+
             await message.answer('Подключение произошло успешно!')
             await message.answer('Отправьте (сколько угодно) фото для игры.\nКогда добавите все фото, используйте команду /ready' + \
                                  ' или нажмите на соответствующую клавишу на клавиатуре', reply_markup=kb.ready_kb)
@@ -125,12 +125,12 @@ async def cmd_ready(message: Message, state: FSMContext):
     game = await get_game(data['token'])
     player = data['current_user']
     end = time() # Игрок написал свой вариант
-    if game:
+    if game and game.game_started:
         if message.text == game.right_answer:
             await message.answer('Вы ответили верно!')
             await game.update_scores(player, end - game.time_from_last_round) # Обновляем очки если игрок ответил правильно
         else:
             await message.answer(f'Вы ошиблись.. это фото игрока {game.right_answer}!')
         await game_running(message, state)
-    else:
+    elif not game:
         await state.set_state(GameState.game_ended)

@@ -21,7 +21,7 @@ class Game:
     def __init__(self, token, host):
         self.token = token # token of game
         self.photos = list(list()) # photos [[photo_id, who_sent_it]]
-        self.players = set() # key - User
+        self.players = list() # key - User
         self.host = host # host tg_id
         self.round_ready = dict() # key - User, value - ready or not for start the game and a round
         self.right_answer = '' # right answer for current round
@@ -37,7 +37,7 @@ class Game:
         if len(self.players) >= MAX_PLAYERS:
             return 'В игре максимальное количество игроков. Присоединитесь к другой игре.'
         else:
-            self.players.add(player)
+            self.players.append(player)
             self.scores[player] = 0
             self.last_round_scores[player] = 0
             self.round_ready[player] = False

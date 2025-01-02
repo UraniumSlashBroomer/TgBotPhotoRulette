@@ -24,7 +24,8 @@ async def create_keyboard_for_game(users):
             kb.append([KeyboardButton(text=str(user.name)) for user in users[i:i + 2]])
 
     elif users_cnt % 2 == 1:
-        kb.append([user for user in users[:3]])
+        kb.append([KeyboardButton(text=str(user.name)) for user in users[:3]])
+
         for i in range(3, users_cnt, 2):
             kb.append([KeyboardButton(text=str(user.name)) for user in users[i:i + 2]])
 
