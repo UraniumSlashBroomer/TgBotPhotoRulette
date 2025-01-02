@@ -11,6 +11,8 @@ reg_router = Router()
 # Команда старта бота
 @reg_router.message(CommandStart())
 async def cmd_start(message: Message, state: FSMContext):
+    print(message.from_user.id)
+    print()
     await state.clear()
     await state.set_state(MenuState.in_menu)
     user_id = message.from_user.id
