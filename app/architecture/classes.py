@@ -32,14 +32,18 @@ class Game:
 
     # Метод добавления игроков
     async def add_player(self, player: User):
+        if self.game_started:
+            return 'Эта игра уже идет, вы не можете присоединяться к идущим играм.'
         if len(self.players) >= MAX_PLAYERS:
-            print(f'Игроков больше 10 в игре {self.token}')
+            return 'В игре максимальное количество игроков. Присоединитесь к другой игре.'
         else:
             self.players.add(player)
             self.scores[player] = 0
             self.last_round_scores[player] = 0
             self.round_ready[player] = False
             print(f'игрок добавлен. Игроки в игре: {self.players}')
+
+        return ''
 
     async def delete_player(self, player: User):
         self.players.remove(player)

@@ -56,15 +56,18 @@ async def cmd_join_to_game_2(message: Message, state: FSMContext):
         game = await get_game(token)
         nickname = await get_nickname(user_id)
         current_user = User(user_id, nickname)
-        await game.add_player(current_user)
-        await state.update_data(current_user=current_user)
-
-        await message.answer('Подключение произошло успешно!')
-        await message.answer('Отправьте (сколько угодно) фото для игры.\nКогда добавите все фото, используйте команду /ready' + \
-                             ' или нажмите на соответствующую клавишу на клавиатуре', reply_markup=kb.ready_kb)
-        await state.set_state(GameState.adding_photos)
-        await state.update_data(token=token)
-        await echo_all(message, state, f'Зашел игрок {nickname}! Всего игроков в игре: {len(game.players)}', True)
+        msg = await game.add_player(current_user)
+        if not msg:
+            await state.update_data(current_user=current_user)
+    
+            await message.answer('Подключение произошло успешно!')
+            await message.answer('Отправьте (сколько угодно) фото для игры.\nКогда добавите все фото, используйте команду /ready' + \
+                                 ' или нажмите на соответствующую клавишу на клавиатуре', reply_markup=kb.ready_kb)
+            await state.set_state(GameState.adding_photos)
+            await state.update_data(token=token)
+            await echo_all(message, state, f'Зашел игрок {nickname}! Всего игроков в игре: {len(game.players)}', True)
+        else:
+            await message.answer(msg)
     else:
         await message.answer('Такого токена не существует. Введите другой токен.')
 
