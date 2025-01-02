@@ -1,10 +1,7 @@
 ### TODO
 - [x] Fix database tg_id type (int -> bigint)
-- [ ] Better FSM
-- [ ] In_game keyboard fix
-
-bugs:
-1.
-![image](https://github.com/user-attachments/assets/339f4954-89b9-440c-bf76-3e8ffc06573d)
-
-2. score bug (need to add maximum score per round)
+- [x] Better FSM
+- [x] In_game keyboard fix (я надеюсь оно работает)
+- [ ] Add /report command for report a bug
+- [ ] Add statistic
+- [ ] Add quick invitation for those who played in the last game with the host

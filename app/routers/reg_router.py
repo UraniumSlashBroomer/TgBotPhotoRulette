@@ -5,14 +5,14 @@ from app.database.requests import set_user, update_nickname, get_nickname
 from app.architecture.states import *
 from app.routers.menu_router import cmd_menu
 import app.architecture.keyboards as kb
+from app.game.game_functions import leave
 
 reg_router = Router()
 
 # Команда старта бота
 @reg_router.message(CommandStart())
 async def cmd_start(message: Message, state: FSMContext):
-    print(message.from_user.id)
-    print()
+    await leave(message, state)
     await state.clear()
     await state.set_state(MenuState.in_menu)
     user_id = message.from_user.id
@@ -42,7 +42,9 @@ async def set_nickname(message: Message, state: FSMContext):
 async def save_nickname(message: Message, state: FSMContext):
     user_id = message.from_user.id
     nickname = message.text
-    if nickname[0] == '/':
+    if nickname == '/menu':
+        await cmd_menu(message, state)
+    elif nickname[0] == '/':
         await message.answer(f'Недопустимый никнейм.')
         await set_nickname(message, state)
     else:
@@ -50,6 +52,5 @@ async def save_nickname(message: Message, state: FSMContext):
         await update_nickname(user_id, nickname)
         await message.answer(f'Вы теперь {nickname}!')
 
-        await state.set_state(MenuState.in_menu)
         await cmd_menu(message, state)
 

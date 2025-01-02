@@ -7,7 +7,21 @@ import app.architecture.keyboards as kb
 from app.architecture.structure import get_game, delete_game
 
 
-# Функция для отправки всем очков после завершения раунда
+async def leave(message: Message, state: FSMContext):
+    data = await state.get_data()
+    if data:
+        token = data['token']
+        current_user = data['current_user']
+        game = await get_game(token)
+        if game:
+            await game.delete_player(current_user)
+            await message.answer('Вы покинули игру.')
+            await echo_all(message, state, f'Игрок {current_user.name} покинул игру.', False, False)
+            if not (await game.are_players_here()):
+                await delete_game(token)
+                print(f'{token} игра удалена. Все игроки вышли.')
+
+# Функция для вывода всем очков после завершения раунда
 async def print_scores(message: Message, state: FSMContext, game):
     scores = game.scores
     msg = ''
@@ -30,7 +44,11 @@ async def print_scores(message: Message, state: FSMContext, game):
                 msg += f'{places_smiles[-1]} {place + 1}. {player.name}: {score}\n'
             else:
                 msg += f'{places_smiles[place]} {place + 1}. {player.name}: {score}\n'
-    await echo_all(message, state, msg, True)
+
+    if game.photos:
+        await echo_all(message, state, msg, True, False)
+    else:
+        await echo_all(message, state, msg, True, True)
 
 
 # Функция для отправки сообщений всем, кто в игре
@@ -64,14 +82,16 @@ async def game_running(message: Message, state: FSMContext):
     data = await state.get_data()
     game = await get_game(data['token'])
     player = data['current_user']
-    await game.player_ready_in_round(player)
+    await game.player_ready(player)
     keyboard = await kb.create_keyboard_for_game(game.players)
     ready = await round_ready(message, state)
 
     # Если фото остались и все игроки готовы, начинаем следующий раунд
     if game.photos and ready:
-        if game.round_counter != 0:
+        if game.game_started: # Если игра уже идет - выводим топ игроков
             await print_scores(message, state, game)
+        else:
+            game.game_started = True # Если это первый раунд - после него надо будет выводить топ игроков
 
         await game.reset_round_ready()
         photo_id, _ = await game.get_random_photo()

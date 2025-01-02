@@ -12,7 +12,6 @@ BOT_TOKEN = getenv("BOT_TOKEN")
 
 async def set_commands(bot: Bot):
     commands = [
-        BotCommand(command='start', description='Старт'),
         BotCommand(command='menu', description='Меню'),
         BotCommand(command='set_nickname', description='Установить никнейм')
         ]

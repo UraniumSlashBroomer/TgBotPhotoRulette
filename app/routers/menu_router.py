@@ -1,10 +1,11 @@
 from aiogram import F, Router
 from aiogram.filters import Command
 from aiogram.types import Message
-from aiogram.enums import ParseMode
 
 from app.architecture.states import *
 from app.architecture.classes import MAX_PLAYERS, TIME_ROUND
+from app.game.game_functions import leave
+
 import app.architecture.keyboards as kb
 
 menu_router = Router()
@@ -13,6 +14,8 @@ menu_router = Router()
 @menu_router.message(Command('menu'))
 @menu_router.message(F.text == 'Погнали в меню!')
 async def cmd_menu(message: Message, state: FSMContext):
+    await leave(message, state)
+    await state.clear()
     await state.set_state(MenuState.in_menu)
     await message.answer(f'Вы вышли в меню. Выберите действие.', reply_markup=kb.main)
 
