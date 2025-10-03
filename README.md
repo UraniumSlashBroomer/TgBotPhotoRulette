@@ -15,11 +15,3 @@ _Максимальное кол-во игроков: 10 человек_
 _Максимальное кол-во фотографий в игре: на данный момент ограничений нет_
 
 _Время, после которого очки не выдаются: 7 секунд_
-
-### TODO
-- [x] Fix database tg_id type (int -> bigint)
-- [x] Better FSM
-- [x] In_game keyboard fix (я надеюсь оно работает)
-- [ ] Add /report command for report a bug
-- [ ] Add statistic
-- [ ] Add quick invitation for those who played in the last game with the host
